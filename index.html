@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoboStore — 11th Committee Robotics Club</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="logo-block">
+        <div class="logo-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect x="8" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="10" r="2" fill="currentColor"/>
+            <circle cx="20" cy="10" r="2" fill="currentColor"/>
+            <rect x="13" y="16" width="6" height="3" fill="currentColor"/>
+            <rect x="6" y="19" width="20" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+            <rect x="2" y="22" width="4" height="3" rx="1" fill="currentColor"/>
+            <rect x="26" y="22" width="4" height="3" rx="1" fill="currentColor"/>
+            <circle cx="11" cy="23.5" r="1.5" fill="currentColor"/>
+            <circle cx="21" cy="23.5" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <span class="logo-title">RoboStore</span>
+          <span class="logo-sub">11th Committee · Robotics Club</span>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-chip"><span id="stat-total">0</span> Items</div>
+        <div class="stat-chip taken"><span id="stat-taken">0</span> Taken</div>
+        <button class="btn-add" id="openModal">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          Add Item
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SEARCH & FILTER BAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Search components…" />
+    </div>
+    <div class="filter-tabs">
+      <button class="tab active" data-filter="all">All</button>
+      <button class="tab" data-filter="available">Available</button>
+      <button class="tab" data-filter="partial">Partial</button>
+      <button class="tab" data-filter="taken">Fully Taken</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <main>
+    <div class="table-wrap">
+      <table id="inventoryTable">
+        <thead>
+          <tr>
+            <th class="col-name">Component Name</th>
+            <th class="col-total sortable" data-col="total">Total <span class="sort-arrow">↕</span></th>
+            <th class="col-avail sortable" data-col="available">Available <span class="sort-arrow">↕</span></th>
+            <th class="col-taken sortable" data-col="taken">Taken <span class="sort-arrow">↕</span></th>
+            <th class="col-by">Taken By</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-icon">📦</div>
+        <p>No components found.</p>
+        <button class="btn-add" id="openModalEmpty">+ Add your first item</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ADD / EDIT MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Component</h2>
+        <button class="modal-close" id="closeModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="fieldName">Component Name</label>
+          <input type="text" id="fieldName" placeholder="e.g. Arduino Uno" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fieldTotal">Total Quantity</label>
+            <input type="number" id="fieldTotal" min="1" placeholder="10" />
+          </div>
+          <div class="form-group">
+            <label for="fieldTaken">Taken Count</label>
+            <input type="number" id="fieldTaken" min="0" placeholder="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="fieldTakenBy">Taken By</label>
+          <input type="text" id="fieldTakenBy" placeholder="e.g. Arjun, Priya (comma-separated)" />
+        </div>
+        <div class="form-error" id="formError"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelModal">Cancel</button>
+        <button class="btn-primary" id="saveItem">Save Component</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM -->
+  <div class="modal-overlay" id="deleteOverlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Delete Component?</h2>
+        <button class="modal-close" id="closeDelete">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to remove <strong id="deleteItemName"></strong> from inventory? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelDelete">Cancel</button>
+        <button class="btn-danger" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
